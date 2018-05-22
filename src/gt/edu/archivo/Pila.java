@@ -42,5 +42,13 @@ public class Pila {
 			t.siguiente = null;
 		}
 	}
+	
+	public void listar() {
+		Nodo t;
+		t = cima;
+		while (t.siguiente != null) {			
+			t = t.siguiente;
+		}
+	}
 
 }
