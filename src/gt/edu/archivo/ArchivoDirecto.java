@@ -1,5 +1,6 @@
 package gt.edu.archivo;
 
+import java.io.File;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -10,8 +11,9 @@ public class ArchivoDirecto {
 
 	// global class variables
 	Scanner sc = new Scanner(System.in);
-	RandomAccessFile fichero = null;
+	RandomAccessFile fichero = null, definicion = null;
 	private final String ruta = "/home/melgust/eclipse-workspace/archivo/src/bd.dat";
+	private final String rutaDefinicion = "/home/melgust/eclipse-workspace/archivo/src/deficion.dat";
 	private final int totalBytes = 83;
 	private final static String formatoFecha = "dd/MM/yyyy";
 	static DateFormat format = new SimpleDateFormat(formatoFecha);
@@ -92,7 +94,7 @@ public class ArchivoDirecto {
 				}
 			} while (longitud <= 0 || longitud > 50);
 			a.setNombre(strNombre);
-			System.out.println("Ingrese la fecha");
+			System.out.println("Ingrese la fecha (" + formatoFecha + ")");
 			Date date = null;
 			while (date == null) {
 				date = strintToDate(sc.nextLine());
@@ -120,8 +122,7 @@ public class ArchivoDirecto {
 				return; //finalizar el procedimiento
 			}
 			// posicionarse al principio del archivo
-			fichero.seek(0);
-			System.out.println(longitud);
+			fichero.seek(0);			
 			Alumno a;
 			while (longitud >= totalBytes) {
 				a = new Alumno();
@@ -234,7 +235,7 @@ public class ArchivoDirecto {
 						fichero.write(a.getBytesNombre());
 						bndModificado = true;
 					}
-					System.out.println("Ingrese la fecha");
+					System.out.println("Ingrese la fecha (" + formatoFecha + ")");
 					tmpStr = sc.nextLine();
 					if (tmpStr.length() > 0) {
 						Date date = null;
