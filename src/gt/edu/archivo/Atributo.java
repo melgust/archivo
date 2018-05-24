@@ -7,8 +7,10 @@ public class Atributo {
 	private int valorTipoDato;
 	private String nombreTipoDato;
 	private int longitud;
+	private int bytes;
 	private boolean requiereLongitud;
 	private byte[] bytesNombre;
+	private TipoDato tipoDato;
 
 	/**
 	 * @return the indice
@@ -67,32 +69,9 @@ public class Atributo {
 	 */
 	public void setValorTipoDato(int valorTipoDato) {
 		this.valorTipoDato = valorTipoDato;
-		if (valorTipoDato == tipoDato.STRING.getValue()) {
+		if (valorTipoDato == TipoDato.STRING.getValue()) {
 			this.requiereLongitud = true;
-			this.nombreTipoDato = tipoDato.STRING.name();
-		}
-		//solo para fijar el nombre
-		if (valorTipoDato == tipoDato.INT.getValue()) {
-			this.nombreTipoDato = tipoDato.INT.name();
-		}
-		if (valorTipoDato == tipoDato.LONG.getValue()) {
-			this.nombreTipoDato = tipoDato.LONG.name();
-		}
-		if (valorTipoDato == tipoDato.DOUBLE.getValue()) {
-			this.nombreTipoDato = tipoDato.DOUBLE.name();
-		}
-		if (valorTipoDato == tipoDato.FLOAT.getValue()) {
-			this.nombreTipoDato = tipoDato.FLOAT.name();
-		}
-		if (valorTipoDato == tipoDato.DATE.getValue()) {
-			this.nombreTipoDato = tipoDato.DATE.name();
-		}
-		if (valorTipoDato == tipoDato.INT.getValue()) {
-			this.nombreTipoDato = tipoDato.INT.name();
-		}
-		if (valorTipoDato == tipoDato.CHAR.getValue()) {
-			this.nombreTipoDato = tipoDato.CHAR.name();
-		}
+		}		
 	}
 
 	/**
@@ -124,6 +103,61 @@ public class Atributo {
 		return nombreTipoDato;
 	}
 	
+	public void setNombreTipoDato() {
+		if (this.valorTipoDato == TipoDato.STRING.getValue()) {			
+			this.nombreTipoDato = TipoDato.STRING.name();
+			this.bytes = this.longitud;
+			tipoDato = TipoDato.STRING;
+		}
+		if (this.valorTipoDato == TipoDato.INT.getValue()) {
+			this.nombreTipoDato = TipoDato.INT.name();
+			this.bytes = 4;
+			tipoDato = TipoDato.INT;
+		}
+		if (this.valorTipoDato == TipoDato.LONG.getValue()) {
+			this.nombreTipoDato = TipoDato.LONG.name();
+			this.bytes = 8;
+			tipoDato = TipoDato.LONG;
+		}
+		if (this.valorTipoDato == TipoDato.DOUBLE.getValue()) {
+			this.nombreTipoDato = TipoDato.DOUBLE.name();
+			this.bytes = 8;
+			tipoDato = TipoDato.DOUBLE;
+		}
+		if (this.valorTipoDato == TipoDato.FLOAT.getValue()) {
+			this.nombreTipoDato = TipoDato.FLOAT.name();
+			this.bytes = 4;
+			tipoDato = TipoDato.FLOAT;
+		}
+		if (this.valorTipoDato == TipoDato.DATE.getValue()) {
+			this.nombreTipoDato = TipoDato.DATE.name();
+			this.bytes = 28;			
+			tipoDato = TipoDato.DATE;
+		}
+		if (this.valorTipoDato == TipoDato.CHAR.getValue()) {
+			this.nombreTipoDato = TipoDato.CHAR.name();
+			/*
+			 * la documentacion de Java indica que un tipo CHAR ocupa dos bytes
+			 * sin embargo RamdomAccessFile no tiene una escritura de tipo char
+			 * por lo que se usara tipo byte, es la razon del por que char sera de un byte 
+			 */
+			this.bytes = 1;
+			tipoDato = TipoDato.CHAR;
+		}
+	}
 	
+	/**
+	 * @return the bytes
+	 */
+	public int getBytes() {
+		return bytes;
+	}
+
+	/**
+	 * @return the tipoDato
+	 */
+	public TipoDato getTipoDato() {
+		return tipoDato;
+	}
 
 }

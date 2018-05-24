@@ -10,6 +10,7 @@ public class Entidad {
 	private int cantidad;
 	private long posicion;
 	private byte[] bytesNombre;
+	private int bytes = 1; //inicia en uno que representa el cambio de linea
 	
 	private List<Atributo> atributos;
 
@@ -114,6 +115,19 @@ public class Entidad {
 		this.posicion = posicion;
 	}
 	
+	/**
+	 * @return the bytes
+	 */
+	public int getBytes() {	
+		bytes = 1;
+		for (Atributo atributo : atributos) {
+			bytes += atributo.getBytes();
+		}
+		return bytes;
+	}
 	
+	public void setBytes(int bytes) {
+		this.bytes = bytes;
+	}
 
 }
