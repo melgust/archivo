@@ -219,6 +219,87 @@ public class ArchivoDirecto {
 		return resultado;
 	}
 
+	private void modificarEntidad() {
+		try {
+			int indice = 0;
+			while (indice < 1 || indice > listaEntidades.size()) {
+				for (Entidad entidad : listaEntidades) {
+					System.out.println(entidad.getIndice() + " ...... " + entidad.getNombre());
+				}
+				System.out.println("Seleccione la entidad que desea modificar");
+				indice = sc.nextInt();
+			}
+			Entidad entidad = null;
+			for (Entidad e : listaEntidades) {
+				if (indice == e.getIndice()) {
+					entidad = e;
+					break;
+				}
+			}
+			String nombreFichero = formarNombreFichero(entidad.getNombre());
+			fichero = new RandomAccessFile(rutaBase + nombreFichero, "rw");
+			long longitudDatos = fichero.length();
+			fichero.close();
+			if (longitudDatos > 0) {
+				System.out.println("No es posible modificar la entidad debido a que ya tiene datos asociados");
+			} else {
+				// bandera para verificar que el registro fue encontrado
+				boolean bndEncontrado = false, bndModificado = false;
+				// posicionarse al principio del archivo
+				entidades.seek(0);
+				long longitud = entidades.length();
+				int registros = 0, salir = 0, i;
+				Entidad e;
+				byte[] tmpBytes;
+				while (longitud > totalBytes) {
+					e = new Entidad();
+					e.setIndice(entidades.readInt());
+					tmpBytes = new byte[30];
+					entidades.read(tmpBytes);
+					e.setBytesNombre(tmpBytes);
+					e.setCantidad(entidades.readInt());
+					e.setBytes(entidades.readInt());
+					e.setPosicion(entidades.readLong());
+					if (entidad.getIndice() == e.getIndice()) {
+						System.out.println("Si no desea modificar el campo presione enter");
+						System.out.println("Ingrese el nombre");
+						String tmpStr = "";
+						int len = 0;
+						long posicion;
+						do {
+							tmpStr = sc.nextLine();
+							len = tmpStr.length();
+							if (len == 1 || len > 30) {
+								System.out.println("La longitud del nombre no es valida [2 - 30]");
+							}
+						} while (len == 1 || len > 30);
+						if (len > 0) {
+							e.setNombre(tmpStr);
+							posicion = registros * totalBytes;
+							fichero.seek(posicion);
+							fichero.skipBytes(4); // moverse despues del indice (int = 4 bytes)
+							// grabar el cambio
+							fichero.write(e.getBytesNombre());
+							bndModificado = true;
+						}
+						i = 1;
+						for (Atributo a : entidad.getAtributos()) {
+							System.out.println("Modificando atributo 1");
+							System.out.println(a.getNombre().trim());
+						}
+						
+						break;
+					}
+					registros++;
+					// restar los bytes del registro leido
+					longitud -= totalBytes;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Error: " + e.getMessage());
+		}
+	}
+
 	private void menuDefinicion(boolean mostrarAgregarRegistro) {
 		int opcion = 1;
 		while (opcion != 0) {
@@ -230,6 +311,7 @@ public class ArchivoDirecto {
 				System.out.println("4 ........ Agregar registros");
 			}
 			System.out.println("5 ........ Borrar bases de datos");
+			System.out.println("6 ........ Pilas y colas");
 			System.out.println("0 ........ Salir");
 			opcion = sc.nextInt();
 			switch (opcion) {
@@ -243,6 +325,7 @@ public class ArchivoDirecto {
 				}
 				break;
 			case 2:
+
 				break;
 			case 3:
 				if (listaEntidades.size() > 0) {
@@ -289,6 +372,9 @@ public class ArchivoDirecto {
 						System.out.println("Archivos borrados");
 					}
 				}
+				break;
+			case 6:
+				menuPilaCola();
 				break;
 			default:
 				System.out.println("Opcion no valida");
@@ -352,6 +438,10 @@ public class ArchivoDirecto {
 		return res;
 	}
 
+	private String formarNombreFichero(String nombre) {
+		return nombre.trim() + ".dat";
+	}
+
 	// metodos para guardar registros segun la definicion
 	private void iniciar(int indice) {
 		int opcion = 0;
@@ -360,14 +450,13 @@ public class ArchivoDirecto {
 			Entidad entidad = null;
 			for (Entidad e : listaEntidades) {
 				if (indice == e.getIndice()) {
-					nombreFichero = e.getNombre().trim() + ".dat";
+					nombreFichero = formarNombreFichero(e.getNombre());
 					entidad = e;
 					break;
 				}
 			}
 			fichero = new RandomAccessFile(rutaBase + nombreFichero, "rw");
 			System.out.println("Bienvenido (a)");
-			int carne;
 			Atributo a = entidad.getAtributos().get(0);
 			do {
 				try {
@@ -391,14 +480,14 @@ public class ArchivoDirecto {
 					case 3:
 						System.out.println("Se hara la busqueda en la primera columna ");
 						System.out.println("Ingrese " + a.getNombre().trim() + " a buscar");
-						//sc.nextLine();
-						//encontrarRegistro(carne);
+						// sc.nextLine();
+						// encontrarRegistro(carne);
 						break;
 					case 4:
 						System.out.println("Ingrese el carne a modificar: ");
-						//carne = sc.nextInt();
-						//sc.nextLine();
-						//modificarRegistro(carne);
+						// carne = sc.nextInt();
+						// sc.nextLine();
+						// modificarRegistro(carne);
 						break;
 					default:
 						System.out.println("Opcion no valida");
@@ -447,11 +536,11 @@ public class ArchivoDirecto {
 											+ " no es valida [1 - " + atributo.getLongitud() + "]");
 								}
 							} while (longitud <= 0 || longitud > atributo.getLongitud());
-							//arreglo de bytes de longitud segun definida
-							bytesString = new byte[atributo.getLongitud()]; 
-							//convertir caracter por caracter a byte y agregarlo al arreglo
+							// arreglo de bytes de longitud segun definida
+							bytesString = new byte[atributo.getLongitud()];
+							// convertir caracter por caracter a byte y agregarlo al arreglo
 							for (int i = 0; i < tmpString.length(); i++) {
-								bytesString[i] = (byte)tmpString.charAt(i);
+								bytesString[i] = (byte) tmpString.charAt(i);
 							}
 							fichero.write(bytesString);
 							break;
@@ -471,13 +560,13 @@ public class ArchivoDirecto {
 								tmpString = sc.nextLine();
 								date = strintToDate(tmpString);
 							}
-							bytesString = new byte[atributo.getBytes()]; 
+							bytesString = new byte[atributo.getBytes()];
 							for (int i = 0; i < tmpString.length(); i++) {
-								bytesString[i] = (byte)tmpString.charAt(i);
+								bytesString[i] = (byte) tmpString.charAt(i);
 							}
 							fichero.write(bytesString);
 							break;
-						case CHAR:							
+						case CHAR:
 							do {
 								tmpString = sc.nextLine();
 								longitud = tmpString.length();
@@ -485,17 +574,18 @@ public class ArchivoDirecto {
 									System.out.println("Solo se permite un caracter");
 								}
 							} while (longitud < 1 || longitud > 1);
-							byte caracter = (byte)tmpString.charAt(0);
+							byte caracter = (byte) tmpString.charAt(0);
 							fichero.writeByte(caracter);
 							break;
 						}
 						valido = true;
 					} catch (Exception e) {
-						System.out.println("Error " + e.getMessage() + " al capturar tipo de dato, vuelva a ingresar el valor: ");
+						System.out.println(
+								"Error " + e.getMessage() + " al capturar tipo de dato, vuelva a ingresar el valor: ");
 						sc.nextLine();
 					}
-				} //end while
-			} //end for
+				} // end while
+			} // end for
 			fichero.write("\n".getBytes()); // cambio de linea para que el siguiente registro se agregue abajo
 			resultado = true;
 		} catch (Exception e) {
@@ -522,17 +612,17 @@ public class ArchivoDirecto {
 			System.out.println(linea);
 			while (longitud >= entidad.getBytes()) {
 				linea = "";
-				for (Atributo atributo : entidad.getAtributos()) {					
+				for (Atributo atributo : entidad.getAtributos()) {
 					switch (atributo.getTipoDato()) {
 					case INT:
 						int tmpInt = fichero.readInt();
-						 linea += String.valueOf(tmpInt) + "\t\t";
+						linea += String.valueOf(tmpInt) + "\t\t";
 						break;
 					case LONG:
 						long tmpLong = fichero.readLong();
 						linea += String.valueOf(tmpLong) + "\t\t";
 						break;
-					case STRING: 
+					case STRING:
 						tmpArrayByte = new byte[atributo.getLongitud()];
 						fichero.read(tmpArrayByte);
 						String tmpString = new String(tmpArrayByte);
@@ -540,7 +630,7 @@ public class ArchivoDirecto {
 						break;
 					case DOUBLE:
 						double tmpDouble = fichero.readDouble();
-						linea += String.valueOf(tmpDouble) + "\t\t";						
+						linea += String.valueOf(tmpDouble) + "\t\t";
 						break;
 					case FLOAT:
 						float tmpFloat = fichero.readFloat();
@@ -558,7 +648,7 @@ public class ArchivoDirecto {
 						break;
 					}
 				}
-				fichero.readByte();// leer el cambio de linea				
+				fichero.readByte();// leer el cambio de linea
 				// restar los bytes del registro leido
 				longitud -= entidad.getBytes();
 				System.out.println(linea);
@@ -711,6 +801,77 @@ public class ArchivoDirecto {
 		String strFecha;
 		strFecha = format.format(date);
 		return strFecha;
+	}
+
+	/*
+	 * Metodos para uso de pilas y colas
+	 */
+
+	public void menuPilaCola() {
+		int opcion = 0;
+		while (opcion < 1 || opcion > 2) {
+			System.out.println("Indique la opcion que desea trabajar");
+			System.out.println("1 .......... Pila");
+			System.out.println("2 .......... Cola");
+			opcion = sc.nextInt();
+		}
+		int salir = 0, dato;
+		Pila pila = null;
+		Cola cola = null;
+		do {
+			System.out.println("1 .......... Insertar");
+			System.out.println("2 .......... Eliminar");
+			System.out.println("3 .......... Listar");
+			System.out.println("4 .......... Vaciar");
+			System.out.println("0 .......... Regresar al menu anterior");
+			System.out.println("Ingrese la operacion a realizar");
+			salir = sc.nextInt();
+			// verificar que las clases esten creadas
+			if (pila == null && opcion == 1) {
+				pila = new Pila();
+			}
+			if (cola == null && opcion == 2) {
+				cola = new Cola();
+			}
+			switch (salir) {
+			case 0:
+				System.out.println("");
+				break;
+			case 1:
+				System.out.println("Ingrese el dato a agregar: ");
+				dato = sc.nextInt();
+				if (opcion == 1) {
+					pila.insertar(dato);
+				} else {
+					cola.insertar(dato);
+				}
+				break;
+			case 2:
+				if (opcion == 1) {
+					pila.quitar();
+				} else {
+					cola.quitar();
+				}
+				break;
+			case 3:
+				if (opcion == 1) {
+					pila.listar();
+				} else {
+					cola.listar();
+				}
+				break;
+			case 4:
+				if (opcion == 1) {
+					pila.vaciar();
+				} else {
+					cola.vaciar();
+				}
+				break;
+			default:
+				System.out.println("Opcion no valida");
+				break;
+			}
+		} while (salir != 0);
 	}
 
 }

@@ -23,6 +23,7 @@ public class Pila {
 		nuevo = new Nodo(elemento);
 		nuevo.siguiente = cima;
 		cima = nuevo;
+		System.out.println("Dato agregado");
 	}
 
 	public int quitar() {
@@ -31,10 +32,11 @@ public class Pila {
 		}
 		int aux = cima.elemento;
 		cima = cima.siguiente;
+		System.out.println("Dato eliminado: " + aux);
 		return aux;
 	}
 
-	public void limpiarPila() {
+	public void vaciar() {
 		Nodo t;
 		while (!pilaVacia()) {
 			t = cima;
@@ -44,10 +46,15 @@ public class Pila {
 	}
 	
 	public void listar() {
-		Nodo t;
-		t = cima;
-		while (t.siguiente != null) {			
-			t = t.siguiente;
+		if (pilaVacia()) {
+			System.out.println("La pila esta vacia");
+		} else {
+			Nodo t;
+			t = cima;			
+			while (t != null) {
+				System.out.println("Dato: " + t.elemento);
+				t = t.siguiente;
+			}
 		}
 	}
 

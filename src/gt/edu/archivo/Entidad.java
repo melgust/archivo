@@ -8,7 +8,7 @@ public class Entidad {
 	private int indice;
 	private String nombre;
 	private int cantidad;
-	private long posicion;
+	private long posicion; //posicion donde inician sus atributos
 	private byte[] bytesNombre;
 	private int bytes = 1; //inicia en uno que representa el cambio de linea
 	
